@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>Product Display</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Pacifico&family=Dancing+Script:wght@700&family=Bebas+Neue&family=Caveat:wght@700&family=Oswald:wght@600&family=Great+Vibes&family=Sacramento&family=Alex+Brush&family=Allura&family=Kaushan+Script&family=Yellowtail&family=Satisfy&family=Cookie&family=Marck+Script&family=Parisienne&family=Tangerine:wght@700&display=swap" rel="stylesheet">
@@ -45,7 +45,7 @@
     flex:1; position:relative; overflow:hidden; background:#111;
     display:flex; align-items:center; justify-content:center;
   }
-  .img-wrap img{
+  .img-wrap img, .img-wrap video{
     width:100%; height:100%;
     object-fit:cover;
     filter:saturate(1.02);
@@ -121,19 +121,18 @@
   }
   .pause-btn.active{ color:var(--accent); background:rgba(0,0,0,.06); }
 
-  .nav-btn{
-    position:fixed; top:50%; transform:translateY(-50%);
-    width:44px; height:44px; border-radius:50%;
-    background:transparent; color:rgba(34,31,27,.10);
-    display:flex; align-items:center; justify-content:center;
-    font-size:15px; z-index:8; cursor:pointer;
+  .tap-zone{
+    position:fixed; top:0; bottom:0; width:38%; z-index:7;
+    display:flex; align-items:center; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     user-select:none;
-    transition:opacity .3s;
   }
-  .nav-btn:active{ color:rgba(34,31,27,.35); }
-  .nav-prev{ left:14px; }
-  .nav-next{ right:14px; }
+  .tap-zone-left{ left:0; justify-content:flex-start; padding-left:14px; }
+  .tap-zone-right{ right:0; justify-content:flex-end; padding-right:14px; }
+  .tap-zone .arrow-hint{
+    color:rgba(34,31,27,.10); font-size:15px;
+  }
+  .tap-zone:active .arrow-hint{ color:rgba(34,31,27,.35); }
 
   .start-overlay{
     position:fixed; inset:0; z-index:50; background:var(--bg);
@@ -154,8 +153,7 @@
 </head>
 <body>
 
-<!-- Preload all custom fonts as soon as the app opens, so the first slide
-     that uses one doesn't briefly show the fallback font while it downloads. -->
+<!-- Preload all custom fonts as soon as the app opens -->
 <div style="position:absolute; opacity:0; pointer-events:none; height:0; overflow:hidden;">
   <span style="font-family:'Poppins';">x</span>
   <span style="font-family:'Playfair Display'; font-style:italic;">x</span>
@@ -196,8 +194,8 @@
 <div class="back-btn" id="backBtn" onclick="exitToStart()">&#8592; Branch</div>
 <div class="pause-btn" id="pauseBtn" onclick="togglePause()">&#10073;&#10073;</div>
 
-<div class="nav-btn nav-prev" id="navPrev" onclick="manualNav(-1)">&#10094;</div>
-<div class="nav-btn nav-next" id="navNext" onclick="manualNav(1)">&#10095;</div>
+<div class="tap-zone tap-zone-left" onclick="manualNav(-1)"><span class="arrow-hint">&#10094;</span></div>
+<div class="tap-zone tap-zone-right" onclick="manualNav(1)"><span class="arrow-hint">&#10095;</span></div>
 
 
 <script>
@@ -239,6 +237,7 @@ let products = [];
 let currentIndex = 0;
 let slideTimer = null;
 let progressStart = null;
+let soundEnabled = false;
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -248,8 +247,8 @@ let BRANCH_FILTER = new URLSearchParams(location.search).get('branch') || localS
 
 async function fetchProducts(){
   let query = BRANCH_FILTER
-    ? sb.from('products').select('*').eq('branch', BRANCH_FILTER).order('sort_order', {ascending:true, nullsFirst:false}).order('id', {ascending:false})
-    : sb.from('products').select('*').order('id', {ascending:false});
+    ? sb.from('products').select('*').eq('branch', BRANCH_FILTER).or('show_on_display.is.null,show_on_display.eq.true').order('sort_order', {ascending:true, nullsFirst:false}).order('id', {ascending:false})
+    : sb.from('products').select('*').or('show_on_display.is.null,show_on_display.eq.true').order('id', {ascending:false});
   const { data, error } = await query;
   if(error){ console.error(error); return; }
   products = data || [];
@@ -258,9 +257,6 @@ async function fetchProducts(){
   restartCycle();
 }
 
-/* Preload every product image into the browser cache before the first
-   render, so slides appear sharp instead of loading/blurring in one by
-   one. Caps the wait so a slow image can't block the whole app. */
 function preloadImages(list){
   const urls = list.map(p => p.image_url).filter(Boolean);
   if(urls.length === 0) return Promise.resolve();
@@ -291,9 +287,19 @@ function renderStage(){
 
   if(currentIndex >= products.length) currentIndex = 0;
 
+  const mediaHtml = p => {
+    if(p.video_url){
+      return `<video src="${p.video_url}" loop muted playsinline></video>`;
+    }
+    if(p.image_url){
+      return `<img src="${p.image_url}">`;
+    }
+    return 'No image';
+  };
+
   stage.innerHTML = products.map((p, i) => {
     const hasElements = p.layout && Array.isArray(p.layout.elements);
-    const hasOldLayout = p.layout && typeof p.layout.x === 'number' && !hasElements;
+    const hasMedia = !!(p.video_url || p.image_url);
 
     if(hasElements){
       const elementsHtml = p.layout.elements.map(el => {
@@ -305,20 +311,18 @@ function renderStage(){
       }).join('');
       return `
     <div class="slide ${i === currentIndex ? 'active' : ''}" data-i="${i}">
-      <div class="img-wrap ${p.image_url ? '' : 'no-image'}" style="flex:1;">
-        ${p.image_url ? `<img src="${p.image_url}">` : 'No image'}
+      <div class="img-wrap ${hasMedia ? '' : 'no-image'}" style="flex:1;">
+        ${mediaHtml(p)}
         ${elementsHtml}
       </div>
     </div>
   `;
     }
 
-    // No custom Design & Position elements placed — show the image alone,
-    // full-bleed, with no automatic text outside/below it.
     return `
     <div class="slide ${i === currentIndex ? 'active' : ''}" data-i="${i}">
-      <div class="img-wrap ${p.image_url ? '' : 'no-image'}">
-        ${p.image_url ? `<img src="${p.image_url}">` : 'No image'}
+      <div class="img-wrap ${hasMedia ? '' : 'no-image'}">
+        ${mediaHtml(p)}
       </div>
     </div>
   `;
@@ -332,11 +336,10 @@ function renderStage(){
 
   if(window.reapplyAllZoom) window.reapplyAllZoom();
   forceFontRepaint(stage);
+  
+  if(soundEnabled) enableVideoSound();
 }
 
-/* Some Android WebViews don't repaint newly-inserted elements in a custom
-   web font right away. Explicitly load each font, then nudge the element's
-   font-family so the browser re-checks and applies it. */
 function forceFontRepaint(container){
   if(!(document.fonts && document.fonts.load)) return;
   container.querySelectorAll('.stage-text').forEach(node => {
@@ -357,7 +360,22 @@ function slideSeconds(i){
 
 function goToSlide(i){
   const slides = document.querySelectorAll('.slide');
-  slides.forEach(s => s.classList.toggle('active', Number(s.dataset.i) === i));
+  slides.forEach(s => {
+    const isActive = (Number(s.dataset.i) === i);
+    s.classList.toggle('active', isActive);
+
+    const vid = s.querySelector('video');
+    if(vid){
+      if(isActive){
+        vid.currentTime = 0; 
+        vid.muted = !soundEnabled; 
+        vid.play().catch(()=>{});
+      } else {
+        vid.pause(); 
+        vid.muted = true; 
+      }
+    }
+  });
 
   const segs = document.querySelectorAll('.progress-seg');
   segs.forEach(seg => {
@@ -373,6 +391,7 @@ function goToSlide(i){
       fill.style.width = '0%';
     }
   });
+  
   const currentSeg = document.querySelector(`.progress-seg[data-i="${i}"]`);
   if(currentSeg){
     currentSeg.classList.add('current');
@@ -386,9 +405,6 @@ function goToSlide(i){
   }
 }
 
-/* Each product can have its own display duration (display_seconds); falls
-   back to SLIDE_SECONDS when not set. A recursive setTimeout is used
-   (instead of setInterval) so every slide can run for its own length. */
 function restartCycle(){
   if(slideTimer) clearTimeout(slideTimer);
   if(products.length === 0) return;
@@ -411,8 +427,6 @@ function scheduleNext(){
   }, slideSeconds(currentIndex) * 1000);
 }
 
-/* Manual navigation: arrow buttons and swipe. Restarts the auto-cycle timer afterward
-   unless the display is paused/pinned on the current product. */
 function manualNav(direction){
   if(products.length === 0) return;
   currentIndex = (currentIndex + direction + products.length) % products.length;
@@ -423,103 +437,17 @@ function manualNav(direction){
 
 let touchStartX = null;
 document.getElementById('stage').addEventListener('touchstart', e => {
-  // Only track single-finger touches, so two-finger pinch-zoom doesn't trigger navigation.
   touchStartX = e.touches.length === 1 ? e.touches[0].clientX : null;
 }, { passive: true });
 document.getElementById('stage').addEventListener('touchend', e => {
   if(touchStartX === null || e.changedTouches.length !== 1) return;
   const dx = e.changedTouches[0].clientX - touchStartX;
   if(Math.abs(dx) > 50){
-    manualNav(dx < 0 ? 1 : -1); // swipe left -> next, swipe right -> previous
+    manualNav(dx < 0 ? 1 : -1); 
   }
   touchStartX = null;
 });
 
-/* Custom pinch-to-zoom — each product remembers its OWN zoom/pan level
-   independently, so zooming one product never affects the others.
-   Works even in Fullscreen mode where native pinch-zoom is disabled. */
-(function(){
-  const stage = document.getElementById('stage');
-  const zoomState = {}; // index -> {scale, panX, panY}
-  let pinchStartDist = null;
-  let activeSlide = null;
-  let baseScale = 1, baseX = 0, baseY = 0;
-  let panStart = null;
-
-  function dist(t0, t1){
-    const dx = t0.clientX - t1.clientX;
-    const dy = t0.clientY - t1.clientY;
-    return Math.sqrt(dx*dx + dy*dy);
-  }
-
-  function stateFor(i){
-    return zoomState[i] || (zoomState[i] = { scale:1, panX:0, panY:0 });
-  }
-
-  function applyTransform(slideEl, st){
-    slideEl.style.transformOrigin = 'center center';
-    slideEl.style.transform = st.scale <= 1.001
-      ? ''
-      : `translate(${st.panX}px, ${st.panY}px) scale(${st.scale})`;
-  }
-
-  // Re-apply each slide's own remembered zoom whenever slides are (re)rendered
-  // or the active one changes.
-  window.reapplyAllZoom = function(){
-    document.querySelectorAll('.slide').forEach(el => {
-      const i = Number(el.dataset.i);
-      applyTransform(el, stateFor(i));
-    });
-  };
-
-  stage.addEventListener('touchstart', e => {
-    activeSlide = document.querySelector('.slide.active');
-    if(!activeSlide) return;
-    const i = Number(activeSlide.dataset.i);
-    const st = stateFor(i);
-    if(e.touches.length === 2){
-      pinchStartDist = dist(e.touches[0], e.touches[1]);
-      baseScale = st.scale; baseX = st.panX; baseY = st.panY;
-      panStart = null;
-    } else if(e.touches.length === 1 && st.scale > 1){
-      panStart = { x: e.touches[0].clientX - st.panX, y: e.touches[0].clientY - st.panY };
-    }
-  }, { passive: true });
-
-  stage.addEventListener('touchmove', e => {
-    if(!activeSlide) return;
-    const i = Number(activeSlide.dataset.i);
-    const st = stateFor(i);
-    if(e.touches.length === 2 && pinchStartDist){
-      e.preventDefault();
-      const newDist = dist(e.touches[0], e.touches[1]);
-      st.scale = Math.max(1, Math.min(baseScale * (newDist / pinchStartDist), 4));
-      applyTransform(activeSlide, st);
-    } else if(e.touches.length === 1 && panStart && st.scale > 1){
-      e.preventDefault();
-      st.panX = e.touches[0].clientX - panStart.x;
-      st.panY = e.touches[0].clientY - panStart.y;
-      applyTransform(activeSlide, st);
-    }
-  }, { passive: false });
-
-  stage.addEventListener('touchend', e => {
-    if(e.touches.length === 0){
-      pinchStartDist = null;
-      panStart = null;
-      if(activeSlide){
-        const i = Number(activeSlide.dataset.i);
-        const st = stateFor(i);
-        if(st.scale <= 1.02){
-          st.scale = 1; st.panX = 0; st.panY = 0;
-          applyTransform(activeSlide, st);
-        }
-      }
-    }
-  });
-})();
-
-/* Realtime sync: refresh whenever Admin Panel changes the products table */
 const channel = sb
   .channel('products-display-sync')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
@@ -530,7 +458,6 @@ const channel = sb
     dot.classList.toggle('off', status !== 'SUBSCRIBED');
   });
 
-/* Fallback: also poll every 30s in case realtime misses an event */
 setInterval(fetchProducts, 30000);
 
 async function loadBranchOptions(){
@@ -553,19 +480,13 @@ async function loadBranchOptions(){
 loadBranchOptions();
 fetchProducts();
 
-/* Keep the screen awake and prevent the phone from locking while the
-   display is running. Uses the native Wake Lock API where available,
-   plus a fallback (a silent looping video "stream") that also works
-   when the page is opened as a local file, where Wake Lock often isn't
-   allowed. Both are re-armed periodically and whenever the tab regains
-   focus, since phones can release a wake lock on their own. */
 let wakeLockRef = null;
 
 async function requestWakeLock(){
   if('wakeLock' in navigator){
     try{
       wakeLockRef = await navigator.wakeLock.request('screen');
-    }catch(e){ /* often blocked on file:// pages — the fallback below covers this */ }
+    }catch(e){ }
   }
 }
 
@@ -606,7 +527,14 @@ function showToast(message){
 
 requestWakeLock();
 
-/* Fullscreen kiosk launch */
+function enableVideoSound(){
+  const activeVideo = document.querySelector('.slide.active video');
+  if(activeVideo){
+    activeVideo.muted = false;
+    activeVideo.play().catch(()=>{});
+  }
+}
+
 function launchFullscreen(){
   const typedBranch = document.getElementById('branchInput').value;
   if(typedBranch){
@@ -624,10 +552,11 @@ function launchFullscreen(){
   requestWakeLock();
   startNoSleepFallback();
   document.getElementById('startOverlay').style.display = 'none';
+
+  soundEnabled = true;
+  enableVideoSound();
 }
 
-/* Lets the person on-site return to the branch-selection screen without
-   reloading the file — useful if one device is shared between branches. */
 function exitToStart(){
   if(slideTimer) clearTimeout(slideTimer);
   const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
@@ -635,8 +564,6 @@ function exitToStart(){
   document.getElementById('startOverlay').style.display = 'flex';
 }
 
-/* Freeze the display on whichever product is showing right now — handy for
-   staff to hold up one item (e.g. today's special) without it auto-advancing. */
 let isPaused = false;
 function togglePause(){
   isPaused = !isPaused;
@@ -652,8 +579,6 @@ function togglePause(){
   }
 }
 
-/* Re-arm the wake lock whenever the tab regains focus, and on an interval
-   as extra insurance, since the OS can silently release it over time. */
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible'){
     requestWakeLock();
