@@ -137,14 +137,17 @@
   }
   .tap-zone:active .arrow-hint{ color:rgba(34,31,27,.35); }
 
+  /* START OVERLAY UPDATED TO FIX OVERLAP */
   .start-overlay{
     position:fixed; inset:0; z-index:50; background:var(--bg);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; padding:24px;
+    overflow-y: auto; /* ছোট স্ক্রিনে স্ক্রল করার সুবিধা যোগ করা হয়েছে */
   }
   .start-overlay .icon{
     width:64px; height:64px; border-radius:16px; background:var(--accent-strong);
     display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom: 10px;
+    flex-shrink: 0;
   }
   .start-overlay h2{ font-size:22px; margin-bottom: 5px; }
   .start-overlay p{ color:var(--muted); font-size:13px; max-width:280px; margin-bottom: 15px; }
@@ -154,6 +157,8 @@
     padding:20px 70px !important; font-size:19px !important; font-weight:800; cursor:pointer;
     box-shadow: 0 8px 25px rgba(181, 118, 47, 0.4);
     text-transform: uppercase; letter-spacing: 1px;
+    position: relative;
+    z-index: 100; /* বাটন যেন সব সময় উপরে থাকে এবং টাচ কাজ করে */
   }
 
   .dev-footer {
@@ -161,6 +166,7 @@
     bottom: 30px;
     width: 100%;
     text-align: center;
+    pointer-events: none; /* ফুটারে ভুল করে টাচ লাগলে যেন বাটনে সমস্যা না হয় */
   }
   .dev-footer .label {
     font-size: 10px;
@@ -181,6 +187,21 @@
     font-weight: 700;
     color: var(--muted);
     margin-top: 5px;
+  }
+
+  /* বিশেষ করে ছোট উচ্চতার স্ক্রিন (Landscape) বা ছোট ফোনের জন্য সমাধান */
+  @media (max-height: 580px) {
+    .start-overlay {
+      justify-content: flex-start;
+      padding-top: 20px;
+    }
+    .dev-footer {
+      position: relative;
+      bottom: auto;
+      margin-top: 40px;
+      padding-bottom: 20px;
+      pointer-events: auto;
+    }
   }
 </style>
 </head>
