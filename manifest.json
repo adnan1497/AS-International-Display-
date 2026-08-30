@@ -1,7 +1,7 @@
 {
   "name": "International Smart Display",
   "short_name": "SmartDisplay",
-  "start_url": "display-app.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#141210",
   "theme_color": "#141210",
@@ -10,12 +10,14 @@
     {
       "src": "icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
