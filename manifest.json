@@ -1,7 +1,7 @@
 {
   "name": "International Smart Display",
   "short_name": "SmartDisplay",
-  "start_url": "index.html",
+  "start_url": "display-app.html",
   "display": "standalone",
   "background_color": "#141210",
   "theme_color": "#141210",
