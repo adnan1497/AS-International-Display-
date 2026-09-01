@@ -113,7 +113,7 @@
     position:fixed; top:calc(10px + env(safe-area-inset-top)); right:12px;
     padding:6px 12px; border-radius:16px;
     background:transparent; color:rgba(34,31,27,.12);
-    font-size:12px; font-weight:600; z-index:10; cursor:pointer;
+    font-size:12px; font-weight:600; z-index:11; cursor:pointer;
     -webkit-tap-highlight-color:transparent; user-select:none;
   }
   .back-btn:active{ color:rgba(34,31,27,.45); }
@@ -123,24 +123,28 @@
     width:26px; height:26px; border-radius:50%;
     background:transparent; color:rgba(34,31,27,.15);
     display:flex; align-items:center; justify-content:center;
-    font-size:11px; z-index:10; cursor:pointer;
+    font-size:11px; z-index:11; cursor:pointer;
     -webkit-tap-highlight-color:transparent; user-select:none;
   }
   .pause-btn.active{ color:var(--accent); background:rgba(0,0,0,.06); }
 
+  /* --- Updated Navigation Buttons --- */
   .nav-btn{
-    position:fixed; top:50%; transform:translateY(-50%);
-    width:44px; height:44px; border-radius:50%;
-    background:transparent; color:rgba(34,31,27,.10);
-    display:flex; align-items:center; justify-content:center;
-    font-size:15px; z-index:8; cursor:pointer;
+    position:fixed; top:0; bottom:0;
+    width:50%; /* ডিসপ্লের অর্ধেক জায়গা জুড়ে */
+    background:transparent; 
+    display:flex; align-items:center; 
+    z-index:8; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     user-select:none;
-    transition:opacity .3s;
+    color:rgba(34,31,27,0.03); /* একদম আবছা রাখা হয়েছে */
+    font-size:30px;
+    transition: color 0.3s;
   }
-  .nav-btn:active{ color:rgba(34,31,27,.35); }
-  .nav-prev{ left:14px; }
-  .nav-next{ right:14px; }
+  .nav-btn:active{ color:rgba(34,31,27,0.1); } /* টাচ করলে হালকা দেখা যাবে */
+  
+  .nav-prev{ left:0; justify-content: flex-start; padding-left: 15px; }
+  .nav-next{ right:0; justify-content: flex-end; padding-right: 15px; }
 
   .start-overlay{
     position:fixed; inset:0; z-index:50; background:var(--bg);
@@ -149,13 +153,41 @@
   }
   .start-overlay .icon{
     width:64px; height:64px; border-radius:16px; background:var(--accent-strong);
-    display:flex; align-items:center; justify-content:center; font-size:30px;
+    display:flex; align-items:center; justify-content:center; font-size:30px; color:#fff;
   }
   .start-overlay h2{ font-size:20px; }
   .start-overlay p{ color:var(--muted); font-size:13px; max-width:280px; }
   .start-overlay button{
     margin-top:6px; background:var(--accent); color:#141210; border:none; border-radius:12px;
     padding:14px 30px; font-size:15px; font-weight:700; cursor:pointer;
+  }
+
+  /* আপনার ডেভেলপার ডিজাইন */
+  .my-credit {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+  }
+  .my-credit .dev-by {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .my-credit .dev-name {
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(to right, #b5762f, #2f5d50);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+  }
+  .my-credit .dev-num {
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 600;
+    margin-top: 2px;
   }
 </style>
 </head>
@@ -192,6 +224,12 @@
     <option value="">All branches</option>
   </select>
   <button onclick="launchFullscreen()">Start Display</button>
+
+  <div class="my-credit">
+    <div class="dev-by">Developed By</div>
+    <div class="dev-name">MD RAJIB AL ADNAN</div>
+    <div class="dev-num">Contact: +966501713483</div>
+  </div>
 </div>
 
 <div id="stage"></div>
@@ -201,6 +239,7 @@
 <div class="back-btn" id="backBtn" onclick="exitToStart()">&#8592; Branch</div>
 <div class="pause-btn" id="pauseBtn" onclick="togglePause()">&#10073;&#10073;</div>
 
+<!-- নেভিগেশন বাটন এখন ডিসপ্লের বাম এবং ডান পাশ দখল করবে -->
 <div class="nav-btn nav-prev" id="navPrev" onclick="manualNav(-1)">&#10094;</div>
 <div class="nav-btn nav-next" id="navNext" onclick="manualNav(1)">&#10095;</div>
 
@@ -579,7 +618,7 @@ function showToast(message){
     toast.style.opacity = '0';
     toast.style.transform = 'translateX(-50%) translateY(10px)';
     setTimeout(() => toast.remove(), 300);
-  }, 2000); // <--- এখানে সেই ২০০০ আছে
+  }, 2000); 
 }
 
 requestWakeLock();
@@ -636,7 +675,7 @@ setInterval(() => {
     requestWakeLock();
     startNoSleepFallback();
   }
-}, 20000); // <--- এখানে সেই ২০০০০ আছে
+}, 20000); 
 
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
