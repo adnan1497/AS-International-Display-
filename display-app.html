@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
+<!-- HarmonyOS ও ট্যাবে ফুল স্ক্রিন গ্যাপ দূর করতে viewport-fit=cover যোগ করা হয়েছে -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
 <title>International Smart Display</title>
 
 <!-- PWA Manifest -->
@@ -12,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Pacifico&family=Dancing+Script:wght@700&family=Bebas+Neue&family=Caveat:wght@700&family=Oswald:wght@600&family=Great+Vibes&family=Sacramento&family=Alex+Brush&family=Allura&family=Kaushan+Script&family=Yellowtail&family=Satisfy&family=Cookie&family=Marck+Script&family=Parisienne&family=Tangerine:wght@700&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<!-- HarmonyOS এ লোগো/বার সমস্যা দূর করতে এটি 'black-translucent' রাখা হয়েছে -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Display">
 <meta name="theme-color" content="#141210">
@@ -128,20 +130,19 @@
   }
   .pause-btn.active{ color:var(--accent); background:rgba(0,0,0,.06); }
 
-  /* --- Updated Navigation Buttons --- */
   .nav-btn{
     position:fixed; top:0; bottom:0;
-    width:50%; /* ডিসপ্লের অর্ধেক জায়গা জুড়ে */
+    width:50%; 
     background:transparent; 
     display:flex; align-items:center; 
     z-index:8; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     user-select:none;
-    color:rgba(34,31,27,0.03); /* একদম আবছা রাখা হয়েছে */
+    color:rgba(34,31,27,0.01); 
     font-size:30px;
     transition: color 0.3s;
   }
-  .nav-btn:active{ color:rgba(34,31,27,0.1); } /* টাচ করলে হালকা দেখা যাবে */
+  .nav-btn:active{ color:rgba(34,31,27,0.1); }
   
   .nav-prev{ left:0; justify-content: flex-start; padding-left: 15px; }
   .nav-next{ right:0; justify-content: flex-end; padding-right: 15px; }
@@ -158,11 +159,10 @@
   .start-overlay h2{ font-size:20px; }
   .start-overlay p{ color:var(--muted); font-size:13px; max-width:280px; }
   .start-overlay button{
-    margin-top:6px; background:var(--accent); color:#141210; border:none; border-radius:12px;
+    margin-top:6px; background:var(--accent); color:#fff; border:none; border-radius:12px;
     padding:14px 30px; font-size:15px; font-weight:700; cursor:pointer;
   }
 
-  /* আপনার ডেভেলপার ডিজাইন */
   .my-credit {
     margin-top: 30px;
     padding-top: 15px;
@@ -194,6 +194,7 @@
 <body>
 
 <div style="position:absolute; opacity:0; pointer-events:none; height:0; overflow:hidden;">
+  <!-- ফন্ট লোডারগুলো অক্ষুণ্ণ রাখা হলো -->
   <span style="font-family:'Poppins';">x</span>
   <span style="font-family:'Playfair Display'; font-style:italic;">x</span>
   <span style="font-family:'Playfair Display';">x</span>
@@ -239,7 +240,6 @@
 <div class="back-btn" id="backBtn" onclick="exitToStart()">&#8592; Branch</div>
 <div class="pause-btn" id="pauseBtn" onclick="togglePause()">&#10073;&#10073;</div>
 
-<!-- নেভিগেশন বাটন এখন ডিসপ্লের বাম এবং ডান পাশ দখল করবে -->
 <div class="nav-btn nav-prev" id="navPrev" onclick="manualNav(-1)">&#10094;</div>
 <div class="nav-btn nav-next" id="navNext" onclick="manualNav(1)">&#10095;</div>
 
@@ -290,11 +290,10 @@ function escapeHtml(s){
 
 let BRANCH_FILTER = new URLSearchParams(location.search).get('branch') || localStorage.getItem('display_branch') || '';
 
-// ভিডিও চেক করার লজিক
+// ভিডিও চেক করার লজিক (Supabase এর URL সাপোর্ট সহ)
 function isVideo(url) {
   if (!url) return false;
-  const cleanUrl = url.split('?')[0].toLowerCase();
-  return cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.mov') || url.toLowerCase().includes('/video/');
+  return /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(url);
 }
 
 async function fetchProducts(){
@@ -355,6 +354,7 @@ function renderStage(){
     let mediaContent = 'No image';
     if(p.image_url) {
       if(isVideo(p.image_url)) {
+        // ভিডিওর জন্য মিউটেড ও অটো-প্লে নিশ্চিত করা হয়েছে
         mediaContent = `<video src="${p.image_url}" autoplay muted playsinline loop></video>`;
       } else {
         mediaContent = `<img src="${p.image_url}">`;
@@ -621,31 +621,6 @@ function startNoSleepFallback(){
   }catch(e){}
 }
 
-function showToast(message){
-  const existing = document.getElementById('toastMsg');
-  if(existing) existing.remove();
-  const toast = document.createElement('div');
-  toast.id = 'toastMsg';
-  toast.textContent = message;
-  toast.style.cssText = `
-    position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(10px);
-    background:#2f5d50; color:#fff;
-    padding:12px 20px; border-radius:24px; font-size:13.5px; font-weight:600;
-    box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:999; opacity:0; transition:opacity .25s, transform .25s;
-    max-width:88vw; text-align:center;
-  `;
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => {
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateX(-50%) translateY(0)';
-  });
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(-50%) translateY(10px)';
-    setTimeout(() => toast.remove(), 300);
-  }, 2000); 
-}
-
 requestWakeLock();
 
 function launchFullscreen(){
@@ -658,7 +633,7 @@ function launchFullscreen(){
     BRANCH_FILTER = '';
   }
   
-  currentIndex = 0; // নতুন ব্রাঞ্চ লোড হলে প্রথম থেকে শুরু হবে
+  currentIndex = 0;
   fetchProducts();
 
   const el = document.documentElement;
@@ -704,7 +679,6 @@ setInterval(() => {
   }
 }, 20000); 
 
-// Service Worker Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => console.log('SW OK')).catch(err => console.log('SW Error'));
