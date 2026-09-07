@@ -2,25 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<!-- HarmonyOS ও ট্যাবে ফুল স্ক্রিন গ্যাপ দূর করতে viewport-fit=cover যোগ করা হয়েছে -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>International Smart Display</title>
 
-<!-- PWA Manifest -->
+<!-- PWA settings -->
 <link rel="manifest" href="manifest.json">
-
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Pacifico&family=Dancing+Script:wght@700&family=Bebas+Neue&family=Caveat:wght@700&family=Oswald:wght@600&family=Great+Vibes&family=Sacramento&family=Alex+Brush&family=Allura&family=Kaushan+Script&family=Yellowtail&family=Satisfy&family=Cookie&family=Marck+Script&family=Parisienne&family=Tangerine:wght@700&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<!-- HarmonyOS এ লোগো/বার সমস্যা দূর করতে এটি 'black-translucent' রাখা হয়েছে -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Display">
 <meta name="theme-color" content="#141210">
-
-<!-- PNG আইকন লিঙ্ক -->
-<link rel="apple-touch-icon" href="icon-512.png">
-
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d50'/%3E%3Ctext x='50' y='64' font-size='46' text-anchor='middle' fill='white' font-family='sans-serif'%3ED%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
@@ -115,7 +112,7 @@
     position:fixed; top:calc(10px + env(safe-area-inset-top)); right:12px;
     padding:6px 12px; border-radius:16px;
     background:transparent; color:rgba(34,31,27,.12);
-    font-size:12px; font-weight:600; z-index:11; cursor:pointer;
+    font-size:12px; font-weight:600; z-index:10; cursor:pointer;
     -webkit-tap-highlight-color:transparent; user-select:none;
   }
   .back-btn:active{ color:rgba(34,31,27,.45); }
@@ -125,76 +122,75 @@
     width:26px; height:26px; border-radius:50%;
     background:transparent; color:rgba(34,31,27,.15);
     display:flex; align-items:center; justify-content:center;
-    font-size:11px; z-index:11; cursor:pointer;
+    font-size:11px; z-index:10; cursor:pointer;
     -webkit-tap-highlight-color:transparent; user-select:none;
   }
   .pause-btn.active{ color:var(--accent); background:rgba(0,0,0,.06); }
 
-  .nav-btn{
-    position:fixed; top:0; bottom:0;
-    width:50%; 
-    background:transparent; 
-    display:flex; align-items:center; 
-    z-index:8; cursor:pointer;
+  .tap-zone{
+    position:fixed; top:0; bottom:0; width:38%; z-index:7;
+    display:flex; align-items:center; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     user-select:none;
-    color:rgba(34,31,27,0.01); 
-    font-size:30px;
-    transition: color 0.3s;
   }
-  .nav-btn:active{ color:rgba(34,31,27,0.1); }
-  
-  .nav-prev{ left:0; justify-content: flex-start; padding-left: 15px; }
-  .nav-next{ right:0; justify-content: flex-end; padding-right: 15px; }
+  .tap-zone-left{ left:0; justify-content:flex-start; padding-left:14px; }
+  .tap-zone-right{ right:0; justify-content:flex-end; padding-right:14px; }
+  .tap-zone .arrow-hint{
+    color:rgba(34,31,27,.10); font-size:15px;
+  }
+  .tap-zone:active .arrow-hint{ color:rgba(34,31,27,.35); }
 
   .start-overlay{
     position:fixed; inset:0; z-index:50; background:var(--bg);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:18px; text-align:center; padding:24px;
+    text-align:center; padding:24px;
+    overflow-y:auto;
   }
   .start-overlay .icon{
     width:64px; height:64px; border-radius:16px; background:var(--accent-strong);
-    display:flex; align-items:center; justify-content:center; font-size:30px; color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:10px;
+    flex-shrink:0; color:#fff;
   }
-  .start-overlay h2{ font-size:20px; }
-  .start-overlay p{ color:var(--muted); font-size:13px; max-width:280px; }
+  .start-overlay h2{ font-size:22px; margin-bottom:5px; }
+  .start-overlay p{ color:var(--muted); font-size:13px; max-width:280px; margin-bottom:15px; }
   .start-overlay button{
-    margin-top:6px; background:var(--accent); color:#fff; border:none; border-radius:12px;
-    padding:14px 30px; font-size:15px; font-weight:700; cursor:pointer;
+    margin-top:10px; background:var(--accent); color:#fff; border:none; border-radius:14px;
+    padding:20px 70px; font-size:19px; font-weight:800; cursor:pointer;
+    box-shadow:0 8px 25px rgba(181,118,47,.4);
+    text-transform:uppercase; letter-spacing:1px;
   }
-
-  .my-credit {
-    margin-top: 30px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
+  .dev-footer{
+    position:absolute; bottom:30px; width:100%; text-align:center; pointer-events:none;
   }
-  .my-credit .dev-by {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 4px;
+  .dev-footer .label{
+    font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:2px;
+    display:block; margin-bottom:4px;
   }
-  .my-credit .dev-name {
-    font-size: 18px;
-    font-weight: 800;
-    background: linear-gradient(to right, #b5762f, #2f5d50);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: block;
+  .dev-footer .name{
+    font-size:16px; font-weight:800; color:var(--ink); font-family:'Poppins',sans-serif;
   }
-  .my-credit .dev-num {
-    font-size: 14px;
-    color: var(--ink);
-    font-weight: 600;
-    margin-top: 2px;
+  .dev-footer .contact{
+    font-size:13px; font-weight:700; color:var(--muted); margin-top:5px;
+  }
+  @media (max-height:580px){
+    .start-overlay{ justify-content:flex-start; padding-top:20px; }
+    .dev-footer{ position:relative; bottom:auto; margin-top:40px; padding-bottom:20px; pointer-events:auto; }
   }
 </style>
 </head>
 <body>
 
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+
+<!-- Preload all custom fonts as soon as the app opens, so the first slide
+     that uses one doesn't briefly show the fallback font while it downloads. -->
 <div style="position:absolute; opacity:0; pointer-events:none; height:0; overflow:hidden;">
-  <!-- ফন্ট লোডারগুলো অক্ষুণ্ণ রাখা হলো -->
   <span style="font-family:'Poppins';">x</span>
   <span style="font-family:'Playfair Display'; font-style:italic;">x</span>
   <span style="font-family:'Playfair Display';">x</span>
@@ -226,22 +222,22 @@
   </select>
   <button onclick="launchFullscreen()">Start Display</button>
 
-  <div class="my-credit">
-    <div class="dev-by">Developed By</div>
-    <div class="dev-name">MD RAJIB AL ADNAN</div>
-    <div class="dev-num">Contact: +966501713483</div>
+  <div class="dev-footer">
+    <span class="label">Developed By</span>
+    <div class="name">MD RAJIB AL ADNAN</div>
+    <div class="contact">Contact: +966501713483</div>
   </div>
 </div>
 
 <div id="stage"></div>
-<video id="noSleepVideo" src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAcIbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAA+gAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAA8V0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAA+gAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAIAAAACAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAPoAAAEAAABAAAAAAM9bWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAAAyAAAAMgBVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAAC6G1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAqhzdGJsAAAAwHN0c2QAAAAAAAAAAQAAALBhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAIAAgBIAAAASAAAAAAAAAABFUxhdmM2MC4zMS4xMDIgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAANmF2Y0MBZAAK/+EAGWdkAAqs2V+IiMBEAAADAAQAAAMAyDxIllgBAAZo6+PLIsD9+PgAAAAAEHBhc3AAAAABAAAAAQAAABRidHJ0AAAAAAAAIGgAACBoAAAAGHN0dHMAAAAAAAAAAQAAABkAAAIAAAAAFHN0c3MAAAAAAAAAAQAAAAEAAADYY3R0cwAAAAAAAAAZAAAAAQAABAAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAA0c3RzYwAAAAAAAAADAAAAAQAAAAMAAAABAAAABgAAAAQAAAABAAAABwAAAAMAAAABAAAAeHN0c3oAAAAAAAAAAAAAABkAAALFAAAADAAAAAwAAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAMHN0Y28AAAAAAAAACAAAB00AAAouAAAKXAAACoYAAAq2AAAK5gAACyIAAAtQAAACbXRyYWsAAABcdGtoZAAAAAMAAAAAAAAAAAAAAAIAAAAAAAADgAAAAAAAAAAAAAAAAQEAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAA4AAAAQAAAEAAAAAAeVtZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAAB9AAAAgAFXEAAAAAAAtaGRscgAAAAAAAAAAc291bgAAAAAAAAAAAAAAAFNvdW5kSGFuZGxlcgAAAAGQbWluZgAAABBzbWhkAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAFUc3RibAAAAH5zdSTS" muted playsinline loop style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; top:0; left:0;"></video>
+<video id="noSleepVideo" src="data:video/mp4;base64,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dG9vAAAAHWRhdGEAAAABAAAAAExhdmY2MC4xNi4xMDAAAAAIZnJlZQAABEZtZGF03gIATGF2YzYwLjMxLjEwMgACMEAOAAACrgYF//+q3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE2NCByMzEwOCAzMWUxOWY5IC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDEwMDMtMjAyMyAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTI1IHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAD2WIhAA7//73Tr8Cm1TCYQAAAAhBmiRsQ7/+4AAAAAhBnkJ4hf/BgQEYIAcAAAAIAZ5hdEK/xIAAAAAIAZ5jakK/xIEAAAAOQZpoSahBaJlMCHf//uEBGCAHAAAACkGehkURLC//wYEAAAAIAZ6ldEK/xIEAAAAIAZ6nakK/xIABGCAHAAAADkGarEmoQWyZTAh3//7gAAAACkGeykUVLC//wYEAAAAIAZ7pdEK/xIABGCAHAAAACAGe62pCv8SAAAAADkGa8EmoQWyZTAhv//7hAAAACkGfDkUVLC//wYEBGCAHAAAACAGfLXRCv8SBAAAACAGfL2pCv8SAAAAADkGbNEmoQWyZTAhn//7gAAAACkGfUkUVLC//wYEBGCAHAAAACAGfcXRCv8SAAAAACAGfc2pCv8SAAAAADkGbeEmoQWyZTAhX//7BARggBwAAAApBn5ZFFSwv/8GAAAAACAGftXRCv8SBAAAACAGft2pCv8SB" muted playsinline loop style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; top:0; left:0;"></video>
 <div class="progress-track" id="progressTrack"></div>
 <div class="conn-dot" id="connDot"></div>
 <div class="back-btn" id="backBtn" onclick="exitToStart()">&#8592; Branch</div>
 <div class="pause-btn" id="pauseBtn" onclick="togglePause()">&#10073;&#10073;</div>
 
-<div class="nav-btn nav-prev" id="navPrev" onclick="manualNav(-1)">&#10094;</div>
-<div class="nav-btn nav-next" id="navNext" onclick="manualNav(1)">&#10095;</div>
+<div class="tap-zone tap-zone-left" onclick="manualNav(-1)"><span class="arrow-hint">&#10094;</span></div>
+<div class="tap-zone tap-zone-right" onclick="manualNav(1)"><span class="arrow-hint">&#10095;</span></div>
 
 
 <script>
@@ -290,21 +286,10 @@ function escapeHtml(s){
 
 let BRANCH_FILTER = new URLSearchParams(location.search).get('branch') || localStorage.getItem('display_branch') || '';
 
-// ভিডিও চেক করার লজিক (Supabase এর URL সাপোর্ট সহ)
-function isVideo(url) {
-  if (!url) return false;
-  return /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(url);
-}
-
 async function fetchProducts(){
-  let query = sb.from('products').select('*');
-  
-  if (BRANCH_FILTER) {
-    query = query.eq('branch', BRANCH_FILTER);
-  }
-  
-  query = query.order('sort_order', {ascending:true, nullsFirst:false}).order('id', {ascending:false});
-
+  let query = BRANCH_FILTER
+    ? sb.from('products').select('*').eq('branch', BRANCH_FILTER).or('show_on_display.is.null,show_on_display.eq.true').order('sort_order', {ascending:true, nullsFirst:false}).order('id', {ascending:false})
+    : sb.from('products').select('*').or('show_on_display.is.null,show_on_display.eq.true').order('id', {ascending:false});
   const { data, error } = await query;
   if(error){ console.error(error); return; }
   products = data || [];
@@ -313,18 +298,17 @@ async function fetchProducts(){
   restartCycle();
 }
 
+/* Preload every product image into the browser cache before the first
+   render, so slides appear sharp instead of loading/blurring in one by
+   one. Caps the wait so a slow image can't block the whole app. */
 function preloadImages(list){
   const urls = list.map(p => p.image_url).filter(Boolean);
   if(urls.length === 0) return Promise.resolve();
   const loaders = urls.map(url => new Promise(resolve => {
-    if(isVideo(url)){
-      resolve();
-    } else {
-      const img = new Image();
-      img.onload = resolve;
-      img.onerror = resolve;
-      img.src = url;
-    }
+    const img = new Image();
+    img.onload = resolve;
+    img.onerror = resolve;
+    img.src = url;
   }));
   const timeout = new Promise(resolve => setTimeout(resolve, 6000));
   return Promise.race([Promise.all(loaders), timeout]);
@@ -347,19 +331,21 @@ function renderStage(){
 
   if(currentIndex >= products.length) currentIndex = 0;
 
+  const mediaHtml = p => {
+    if(p.video_url){
+      // MODIFIED: Removed 'loop' so video stops after it finishes.
+      return `<video src="${p.video_url}" autoplay muted playsinline></video>`;
+    }
+    if(p.image_url){
+      return `<img src="${p.image_url}">`;
+    }
+    return 'No image';
+  };
+
   stage.innerHTML = products.map((p, i) => {
     const hasElements = p.layout && Array.isArray(p.layout.elements);
-    
-    // ভিডিও বা ইমেজ কন্টেন্ট জেনারেট করা
-    let mediaContent = 'No image';
-    if(p.image_url) {
-      if(isVideo(p.image_url)) {
-        // ভিডিওর জন্য মিউটেড ও অটো-প্লে নিশ্চিত করা হয়েছে
-        mediaContent = `<video src="${p.image_url}" autoplay muted playsinline loop></video>`;
-      } else {
-        mediaContent = `<img src="${p.image_url}">`;
-      }
-    }
+    const hasOldLayout = p.layout && typeof p.layout.x === 'number' && !hasElements;
+    const hasMedia = !!(p.video_url || p.image_url);
 
     if(hasElements){
       const elementsHtml = p.layout.elements.map(el => {
@@ -371,18 +357,20 @@ function renderStage(){
       }).join('');
       return `
     <div class="slide ${i === currentIndex ? 'active' : ''}" data-i="${i}">
-      <div class="img-wrap ${p.image_url ? '' : 'no-image'}" style="flex:1;">
-        ${mediaContent}
+      <div class="img-wrap ${hasMedia ? '' : 'no-image'}" style="flex:1;">
+        ${mediaHtml(p)}
         ${elementsHtml}
       </div>
     </div>
   `;
     }
 
+    // No custom Design & Position elements placed — show the media alone,
+    // full-bleed, with no automatic text outside/below it.
     return `
     <div class="slide ${i === currentIndex ? 'active' : ''}" data-i="${i}">
-      <div class="img-wrap ${p.image_url ? '' : 'no-image'}">
-        ${mediaContent}
+      <div class="img-wrap ${hasMedia ? '' : 'no-image'}">
+        ${mediaHtml(p)}
       </div>
     </div>
   `;
@@ -396,8 +384,12 @@ function renderStage(){
 
   if(window.reapplyAllZoom) window.reapplyAllZoom();
   forceFontRepaint(stage);
+  if(typeof soundEnabled !== 'undefined' && soundEnabled) enableVideoSound();
 }
 
+/* Some Android WebViews don't repaint newly-inserted elements in a custom
+   web font right away. Explicitly load each font, then nudge the element's
+   font-family so the browser re-checks and applies it. */
 function forceFontRepaint(container){
   if(!(document.fonts && document.fonts.load)) return;
   container.querySelectorAll('.stage-text').forEach(node => {
@@ -418,7 +410,24 @@ function slideSeconds(i){
 
 function goToSlide(i){
   const slides = document.querySelectorAll('.slide');
-  slides.forEach(s => s.classList.toggle('active', Number(s.dataset.i) === i));
+  slides.forEach(s => {
+    const slideIdx = Number(s.dataset.i);
+    const isActive = slideIdx === i;
+    s.classList.toggle('active', isActive);
+
+    // MODIFIED: Manage video playback/sound on each slide change
+    const video = s.querySelector('.img-wrap video');
+    if(video){
+      if(isActive){
+        video.currentTime = 0; // Restart video
+        if(soundEnabled) video.muted = false;
+        video.play().catch(()=>{});
+      } else {
+        video.pause(); // Stop and mute background videos
+        video.muted = true;
+      }
+    }
+  });
 
   const segs = document.querySelectorAll('.progress-seg');
   segs.forEach(seg => {
@@ -447,6 +456,9 @@ function goToSlide(i){
   }
 }
 
+/* Each product can have its own display duration (display_seconds); falls
+   back to SLIDE_SECONDS when not set. A recursive setTimeout is used
+   (instead of setInterval) so every slide can run for its own length. */
 function restartCycle(){
   if(slideTimer) clearTimeout(slideTimer);
   if(products.length === 0) return;
@@ -469,6 +481,8 @@ function scheduleNext(){
   }, slideSeconds(currentIndex) * 1000);
 }
 
+/* Manual navigation: arrow buttons and swipe. Restarts the auto-cycle timer afterward
+   unless the display is paused/pinned on the current product. */
 function manualNav(direction){
   if(products.length === 0) return;
   currentIndex = (currentIndex + direction + products.length) % products.length;
@@ -479,96 +493,23 @@ function manualNav(direction){
 
 let touchStartX = null;
 document.getElementById('stage').addEventListener('touchstart', e => {
+  // Only track single-finger touches, so two-finger pinch-zoom doesn't trigger navigation.
   touchStartX = e.touches.length === 1 ? e.touches[0].clientX : null;
 }, { passive: true });
 document.getElementById('stage').addEventListener('touchend', e => {
   if(touchStartX === null || e.changedTouches.length !== 1) return;
   const dx = e.changedTouches[0].clientX - touchStartX;
   if(Math.abs(dx) > 50){
-    manualNav(dx < 0 ? 1 : -1);
+    manualNav(dx < 0 ? 1 : -1); // swipe left -> next, swipe right -> previous
   }
   touchStartX = null;
 });
 
-(function(){
-  const stage = document.getElementById('stage');
-  const zoomState = {};
-  let pinchStartDist = null;
-  let activeSlide = null;
-  let baseScale = 1, baseX = 0, baseY = 0;
-  let panStart = null;
+/* Pinch-to-zoom is intentionally disabled — accidental two-hand touches
+   while plugging in the charger were zooming the display in unintentionally. */
 
-  function dist(t0, t1){
-    const dx = t0.clientX - t1.clientX;
-    const dy = t0.clientY - t1.clientY;
-    return Math.sqrt(dx*dx + dy*dy);
-  }
 
-  function stateFor(i){
-    return zoomState[i] || (zoomState[i] = { scale:1, panX:0, panY:0 });
-  }
-
-  function applyTransform(slideEl, st){
-    slideEl.style.transformOrigin = 'center center';
-    slideEl.style.transform = st.scale <= 1.001
-      ? ''
-      : `translate(${st.panX}px, ${st.panY}px) scale(${st.scale})`;
-  }
-
-  window.reapplyAllZoom = function(){
-    document.querySelectorAll('.slide').forEach(el => {
-      const i = Number(el.dataset.i);
-      applyTransform(el, stateFor(i));
-    });
-  };
-
-  stage.addEventListener('touchstart', e => {
-    activeSlide = document.querySelector('.slide.active');
-    if(!activeSlide) return;
-    const i = Number(activeSlide.dataset.i);
-    const st = stateFor(i);
-    if(e.touches.length === 2){
-      pinchStartDist = dist(e.touches[0], e.touches[1]);
-      baseScale = st.scale; baseX = st.panX; baseY = st.panY;
-      panStart = null;
-    } else if(e.touches.length === 1 && st.scale > 1){
-      panStart = { x: e.touches[0].clientX - st.panX, y: e.touches[0].clientY - st.panY };
-    }
-  }, { passive: true });
-
-  stage.addEventListener('touchmove', e => {
-    if(!activeSlide) return;
-    const i = Number(activeSlide.dataset.i);
-    const st = stateFor(i);
-    if(e.touches.length === 2 && pinchStartDist){
-      e.preventDefault();
-      const newDist = dist(e.touches[0], e.touches[1]);
-      st.scale = Math.max(1, Math.min(baseScale * (newDist / pinchStartDist), 4));
-      applyTransform(activeSlide, st);
-    } else if(e.touches.length === 1 && panStart && st.scale > 1){
-      e.preventDefault();
-      st.panX = e.touches[0].clientX - panStart.x;
-      st.panY = e.touches[0].clientY - panStart.y;
-      applyTransform(activeSlide, st);
-    }
-  }, { passive: false });
-
-  stage.addEventListener('touchend', e => {
-    if(e.touches.length === 0){
-      pinchStartDist = null;
-      panStart = null;
-      if(activeSlide){
-        const i = Number(activeSlide.dataset.i);
-        const st = stateFor(i);
-        if(st.scale <= 1.02){
-          st.scale = 1; st.panX = 0; st.panY = 0;
-          applyTransform(activeSlide, st);
-        }
-      }
-    }
-  });
-})();
-
+/* Realtime sync: refresh whenever Admin Panel changes the products table */
 const channel = sb
   .channel('products-display-sync')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
@@ -579,6 +520,7 @@ const channel = sb
     dot.classList.toggle('off', status !== 'SUBSCRIBED');
   });
 
+/* Fallback: also poll every 30s in case realtime misses an event */
 setInterval(fetchProducts, 30000);
 
 async function loadBranchOptions(){
@@ -601,13 +543,19 @@ async function loadBranchOptions(){
 loadBranchOptions();
 fetchProducts();
 
+/* Keep the screen awake and prevent the phone from locking while the
+   display is running. Uses the native Wake Lock API where available,
+   plus a fallback (a silent looping video "stream") that also works
+   when the page is opened as a local file, where Wake Lock often isn't
+   allowed. Both are re-armed periodically and whenever the tab regains
+   focus, since phones can release a wake lock on their own. */
 let wakeLockRef = null;
 
 async function requestWakeLock(){
   if('wakeLock' in navigator){
     try{
       wakeLockRef = await navigator.wakeLock.request('screen');
-    }catch(e){}
+    }catch(e){ /* often blocked on file:// pages — the fallback below covers this */ }
   }
 }
 
@@ -621,7 +569,47 @@ function startNoSleepFallback(){
   }catch(e){}
 }
 
+function showToast(message){
+  const existing = document.getElementById('toastMsg');
+  if(existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.id = 'toastMsg';
+  toast.textContent = message;
+  toast.style.cssText = `
+    position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(10px);
+    background:#2f5d50; color:#fff;
+    padding:12px 20px; border-radius:24px; font-size:13.5px; font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:999; opacity:0; transition:opacity .25s, transform .25s;
+    max-width:88vw; text-align:center;
+  `;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(10px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+
 requestWakeLock();
+
+/* Fullscreen kiosk launch */
+let soundEnabled = false;
+
+// MODIFIED: Only enable sound for the CURRENT active video.
+function enableVideoSound(){
+  const activeSlide = document.querySelector('.slide.active');
+  if(activeSlide){
+    const v = activeSlide.querySelector('.img-wrap video');
+    if(v){
+      v.muted = false;
+      v.play().catch(()=>{});
+    }
+  }
+}
 
 function launchFullscreen(){
   const typedBranch = document.getElementById('branchInput').value;
@@ -632,8 +620,6 @@ function launchFullscreen(){
     localStorage.removeItem('display_branch');
     BRANCH_FILTER = '';
   }
-  
-  currentIndex = 0;
   fetchProducts();
 
   const el = document.documentElement;
@@ -642,8 +628,15 @@ function launchFullscreen(){
   requestWakeLock();
   startNoSleepFallback();
   document.getElementById('startOverlay').style.display = 'none';
+
+  // The tap that starts the display counts as the user gesture browsers
+  // require to allow videos to play with sound.
+  soundEnabled = true;
+  enableVideoSound();
 }
 
+/* Lets the person on-site return to the branch-selection screen without
+   reloading the file — useful if one device is shared between branches. */
 function exitToStart(){
   if(slideTimer) clearTimeout(slideTimer);
   const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
@@ -651,6 +644,8 @@ function exitToStart(){
   document.getElementById('startOverlay').style.display = 'flex';
 }
 
+/* Freeze the display on whichever product is showing right now — handy for
+   staff to hold up one item (e.g. today's special) without it auto-advancing. */
 let isPaused = false;
 function togglePause(){
   isPaused = !isPaused;
@@ -666,6 +661,8 @@ function togglePause(){
   }
 }
 
+/* Re-arm the wake lock whenever the tab regains focus, and on an interval
+   as extra insurance, since the OS can silently release it over time. */
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible'){
     requestWakeLock();
@@ -677,13 +674,7 @@ setInterval(() => {
     requestWakeLock();
     startNoSleepFallback();
   }
-}, 20000); 
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => console.log('SW OK')).catch(err => console.log('SW Error'));
-  });
-}
+}, 20000);
 </script>
 </body>
 </html>
