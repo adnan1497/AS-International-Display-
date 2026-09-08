@@ -612,6 +612,11 @@ function enableVideoSound(){
 }
 
 function launchFullscreen(){
+  // --- এখানে পরিবর্তন করা হয়েছে ---
+  if(slideTimer) clearTimeout(slideTimer);
+  currentIndex = 0; 
+  // -------------------------
+
   const typedBranch = document.getElementById('branchInput').value;
   if(typedBranch){
     localStorage.setItem('display_branch', typedBranch);
@@ -639,6 +644,7 @@ function launchFullscreen(){
    reloading the file — useful if one device is shared between branches. */
 function exitToStart(){
   if(slideTimer) clearTimeout(slideTimer);
+  currentIndex = 0; // এখানেও রিসেট করে দেওয়া হয়েছে
   const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
   if(exit && document.fullscreenElement){ exit.call(document).catch(()=>{}); }
   document.getElementById('startOverlay').style.display = 'flex';
