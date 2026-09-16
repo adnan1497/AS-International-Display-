@@ -215,10 +215,13 @@ if('serviceWorker' in navigator){
 <div class="start-overlay" id="startOverlay">
   <div class="icon">▶</div>
   <h2>International Smart Display</h2>
-  <p>Which branch is this? Leave blank to show all branches.</p>
+  <p>Type the company name exactly, then choose its branch.</p>
+  <input id="companyInput" list="companyOptions" autocomplete="off" placeholder="Type company name exactly"
+         style="width:100%; max-width:280px; padding:12px 16px; border-radius:12px; border:1px solid #ddd6c9; font-size:15px; text-align:center; background:#fff; color:var(--ink); margin-bottom:4px;">
+  <datalist id="companyOptions"></datalist>
   <select id="branchInput"
          style="width:100%; max-width:280px; padding:12px 16px; border-radius:12px; border:1px solid #ddd6c9; font-size:15px; text-align:center; background:#fff; color:var(--ink); margin-bottom:4px;">
-    <option value="">All branches</option>
+    <option value="">Select branch</option>
   </select>
   <button onclick="launchFullscreen()">Start Display</button>
 
@@ -230,7 +233,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <div id="stage"></div>
-<video id="noSleepVideo" src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAcIbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAA+gAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAA8V0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAA+gAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAIAAAACAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAPoAAAEAAABAAAAAAM9bWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAAAyAAAAMgBVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAAC6G1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAqhzdGJsAAAAwHN0c2QAAAAAAAAAAQAAALBhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAIAAgBIAAAASAAAAAAAAAABFUxhdmM2MC4zMS4xMDIgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAANmF2Y0MBZAAK/+EAGWdkAAqs2V+IiMBEAAADAAQAAAMAyDxIllgBAAZo6+PLIsD9+PgAAAAAEHBhc3AAAAABAAAAAQAAABRidHJ0AAAAAAAAIGgAACBoAAAAGHN0dHMAAAAAAAAAAQAAABkAAAIAAAAAFHN0c3MAAAAAAAAAAQAAAAEAAADYY3R0cwAAAAAAAAAZAAAAAQAABAAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAA0c3RzYwAAAAAAAAADAAAAAQAAAAMAAAABAAAABgAAAAQAAAABAAAABwAAAAMAAAABAAAAeHN0c3oAAAAAAAAAAAAAABkAAALFAAAADAAAAAwAAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAEgAAAA4AAAAMAAAADAAAABIAAAAOAAAADAAAAAwAAAASAAAADgAAAAwAAAAMAAAAMHN0Y28AAAAAAAAACAAAB00AAAouAAAKXAAACoYAAAq2AAAK5gAACyIAAAtQAAACbXRyYWsAAABcdGtoZAAAAAMAAAAAAAAAAAAAAAIAAAAAAAADgAAAAAAAAAAAAAAAAQEAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAA4AAAAQAAAEAAAAAAeVtZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAAB9AAAAgAFXEAAAAAAAtaGRscgAAAAAAAAAAc291bgAAAAAAAAAAAAAAAFNvdW5kSGFuZGxlcgAAAAGQbWluZgAAABBzbWhkAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAFUc3RibAAAAH5zdHNkAAAAAAAAAAEAAABubXA0YQAAAAAAAAABAAAAAAAAAAAAAQAQAAAAAB9AAAAAAAA2ZXNkcwAAAAADgICAJQACAASAgIAXQBUAAAAAALuAAAABfgWAgIAFFYhW5QAGgICAAQIAAAAUYnRydAAAAAAAALuAAAABfgAAABhzdHRzAAAAAAAAAAEAAAAIAAAEAAAAABxzdHNjAAAAAAAAAAEAAAABAAAAAQAAAAEAAAA0c3RzegAAAAAAAAAAAAAACAAAABUAAAAEAAAABAAAAAQAAAAEAAAABAAAAAQAAAAEAAAAMHN0Y28AAAAAAAAACAAABzgAAAoqAAAKWAAACoIAAAqyAAAK4gAACx4AAAtMAAAAGnNncGQBAAAAcm9sbAAAAAIAAAAB//8AAAAcc2JncAAAAAByb2xsAAAAAQAAAAgAAAABAAAAYnVkdGEAAABabWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRpcmFwcGwAAAAAAAAAAAAAAAAtaWxzdAAAACWpdG9vAAAAHWRhdGEAAAABAAAAAExhdmY2MC4xNi4xMDAAAAAIZnJlZQAABEZtZGF03gIATGF2YzYwLjMxLjEwMgACMEAOAAACrgYF//+q3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE2NCByMzEwOCAzMWUxOWY5IC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDEwMDMtMjAyMyAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTI1IHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAD2WIhAA7//73Tr8Cm1TCYQAAAAhBmiRsQ7/+4AAAAAhBnkJ4hf/BgQEYIAcAAAAIAZ5hdEK/xIAAAAAIAZ5jakK/xIEAAAAOQZpoSahBaJlMCHf//uEBGCAHAAAACkGehkURLC//wYEAAAAIAZ6ldEK/xIEAAAAIAZ6nakK/xIABGCAHAAAADkGarEmoQWyZTAh3//7gAAAACkGeykUVLC//wYEAAAAIAZ7pdEK/xIABGCAHAAAACAGe62pCv8SAAAAADkGa8EmoQWyZTAhv//7hAAAACkGfDkUVLC//wYEBGCAHAAAACAGfLXRCv8SBAAAACAGfL2pCv8SAAAAADkGbNEmoQWyZTAhn//7gAAAACkGfUkUVLC//wYEBGCAHAAAACAGfcXRCv8SAAAAACAGfc2pCv8SAAAAADkGbeEmoQWyZTAhX//7BARggBwAAAApBn5ZFFSwv/8GAAAAACAGftXRCv8SBAAAACAGft2pCv8SB" muted playsinline loop style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; top:0; left:0;"></video>
+<video id="noSleepVideo" src="data:video/mp4;base64,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dG9vAAAAHWRhdGEAAAABAAAAAExhdmY2MC4xNi4xMDAAAAAIZnJlZQAABEZtZGF03gIATGF2YzYwLjMxLjEwMgACMEAOAAACrgYF//+q3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE2NCByMzEwOCAzMWUxOWY5IC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAyMyAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTI1IHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAD2WIhAA7//73Tr8Cm1TCYQAAAAhBmiRsQ7/+4AAAAAhBnkJ4hf/BgQEYIAcAAAAIAZ5hdEK/xIAAAAAIAZ5jakK/xIEAAAAOQZpoSahBaJlMCHf//uEBGCAHAAAACkGehkURLC//wYEAAAAIAZ6ldEK/xIEAAAAIAZ6nakK/xIABGCAHAAAADkGarEmoQWyZTAh3//7gAAAACkGeykUVLC//wYEAAAAIAZ7pdEK/xIABGCAHAAAACAGe62pCv8SAAAAADkGa8EmoQWyZTAhv//7hAAAACkGfDkUVLC//wYEBGCAHAAAACAGfLXRCv8SBAAAACAGfL2pCv8SAAAAADkGbNEmoQWyZTAhn//7gAAAACkGfUkUVLC//wYEBGCAHAAAACAGfcXRCv8SAAAAACAGfc2pCv8SAAAAADkGbeEmoQWyZTAhX//7BARggBwAAAApBn5ZFFSwv/8GAAAAACAGftXRCv8SBAAAACAGft2pCv8SB" muted playsinline loop style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; top:0; left:0;"></video>
 <div class="progress-track" id="progressTrack"></div>
 <div class="conn-dot" id="connDot"></div>
 <div class="back-btn" id="backBtn" onclick="exitToStart()">&#8592; Branch</div>
@@ -285,11 +288,23 @@ function escapeHtml(s){
 }
 
 let BRANCH_FILTER = new URLSearchParams(location.search).get('branch') || localStorage.getItem('display_branch') || '';
+let COMPANY_FILTER = new URLSearchParams(location.search).get('company') || localStorage.getItem('display_company') || '';
 
 async function fetchProducts(){
-  let query = BRANCH_FILTER
-    ? sb.from('products').select('*').eq('branch', BRANCH_FILTER).or('show_on_display.is.null,show_on_display.eq.true').order('sort_order', {ascending:true, nullsFirst:false}).order('id', {ascending:false})
-    : sb.from('products').select('*').or('show_on_display.is.null,show_on_display.eq.true').order('id', {ascending:false});
+  // Company is mandatory here: never show products from another company.
+  if(!COMPANY_FILTER){
+    products = [];
+    renderStage();
+    restartCycle();
+    return;
+  }
+  let query = sb.from('products').select('*')
+    .eq('company', COMPANY_FILTER)
+    .or('show_on_display.is.null,show_on_display.eq.true');
+  if(BRANCH_FILTER) query = query.eq('branch', BRANCH_FILTER);
+  query = BRANCH_FILTER
+    ? query.order('sort_order', {ascending:true, nullsFirst:false}).order('id', {ascending:false})
+    : query.order('id', {ascending:false});
   const { data, error } = await query;
   if(error){ console.error(error); return; }
   products = data || [];
@@ -333,8 +348,7 @@ function renderStage(){
 
   const mediaHtml = p => {
     if(p.video_url){
-      // MODIFIED: Removed 'loop' so video stops after it finishes.
-      return `<video src="${p.video_url}" autoplay muted playsinline></video>`;
+      return `<video src="${p.video_url}" class="stage-video" loop muted playsinline></video>`;
     }
     if(p.image_url){
       return `<img src="${p.image_url}">`;
@@ -410,22 +424,21 @@ function slideSeconds(i){
 
 function goToSlide(i){
   const slides = document.querySelectorAll('.slide');
-  slides.forEach(s => {
-    const slideIdx = Number(s.dataset.i);
-    const isActive = slideIdx === i;
-    s.classList.toggle('active', isActive);
+  slides.forEach(s => s.classList.toggle('active', Number(s.dataset.i) === i));
 
-    // MODIFIED: Manage video playback/sound on each slide change
-    const video = s.querySelector('.img-wrap video');
-    if(video){
-      if(isActive){
-        video.currentTime = 0; // Restart video
-        if(soundEnabled) video.muted = false;
-        video.play().catch(()=>{});
-      } else {
-        video.pause(); // Stop and mute background videos
-        video.muted = true;
-      }
+  // Only the active slide's video should ever play (with sound, if enabled).
+  // Every other video is paused and muted so sound never bleeds into
+  // whichever product the display has moved on to.
+  document.querySelectorAll('.stage-video').forEach(v => {
+    const slideEl = v.closest('.slide');
+    const isActive = slideEl && Number(slideEl.dataset.i) === i;
+    if(isActive){
+      v.muted = !(typeof soundEnabled !== 'undefined' && soundEnabled);
+      v.currentTime = 0;
+      v.play().catch(()=>{});
+    } else {
+      v.pause();
+      v.muted = true;
     }
   });
 
@@ -523,20 +536,84 @@ const channel = sb
 /* Fallback: also poll every 30s in case realtime misses an event */
 setInterval(fetchProducts, 30000);
 
-async function loadBranchOptions(){
+let allDisplayBranches = [];
+
+function getCompanyNames(){
+  return [...new Set(allDisplayBranches.map(b => String(b.company || '').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+}
+
+function populateCompanyOptions(){
+  const input = document.getElementById('companyInput');
+  const list = document.getElementById('companyOptions');
+  if(!input || !list) return;
+  list.innerHTML = '';
+  getCompanyNames().forEach(company => {
+    const opt = document.createElement('option');
+    opt.value = company;
+    list.appendChild(opt);
+  });
+  if(COMPANY_FILTER && getCompanyNames().includes(COMPANY_FILTER)){
+    input.value = COMPANY_FILTER;
+  }
+}
+
+function populateBranchOptions(){
   const select = document.getElementById('branchInput');
+  if(!select) return;
+  const company = document.getElementById('companyInput').value.trim();
+  const branches = allDisplayBranches.filter(b => String(b.company || '').trim() === company);
+
+  select.innerHTML = '<option value="">Select branch</option>';
+  [...new Set(branches.map(b => String(b.name || '').trim()).filter(Boolean))].forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+
+  if(BRANCH_FILTER && branches.some(b => String(b.name || '').trim() === BRANCH_FILTER)){
+    select.value = BRANCH_FILTER;
+  } else {
+    select.value = '';
+    BRANCH_FILTER = '';
+  }
+}
+
+function onCompanyChange(){
+  const selectedCompany = document.getElementById('companyInput').value.trim();
+  COMPANY_FILTER = selectedCompany;
+  BRANCH_FILTER = '';
+  localStorage.removeItem('display_branch');
+  populateBranchOptions();
+}
+
+document.getElementById('companyInput').addEventListener('input', onCompanyChange);
+document.getElementById('companyInput').addEventListener('change', onCompanyChange);
+document.getElementById('branchInput').addEventListener('change', () => {
+  BRANCH_FILTER = document.getElementById('branchInput').value;
+});
+
+async function loadBranchOptions(){
   try{
-    const { data, error } = await sb.from('branches').select('*').order('name', { ascending: true });
+    const { data, error } = await sb.from('branches').select('*').order('company', { ascending: true }).order('name', { ascending: true });
     if(error || !data) return;
-    data.forEach(b => {
-      const opt = document.createElement('option');
-      opt.value = b.name;
-      opt.textContent = b.name;
-      select.appendChild(opt);
-    });
-    if(BRANCH_FILTER){
-      select.value = BRANCH_FILTER;
+    allDisplayBranches = data || [];
+
+    // If an older installation has only a saved branch, recover its company
+    // from the same branch record instead of showing unrelated products.
+    if(!COMPANY_FILTER && BRANCH_FILTER){
+      const matches = allDisplayBranches.filter(b => String(b.name || '').trim() === BRANCH_FILTER && b.company);
+      if(matches.length === 1){
+        COMPANY_FILTER = String(matches[0].company).trim();
+        localStorage.setItem('display_company', COMPANY_FILTER);
+      } else {
+        BRANCH_FILTER = '';
+        localStorage.removeItem('display_branch');
+      }
     }
+
+    populateCompanyOptions();
+    populateBranchOptions();
   }catch(e){}
 }
 
@@ -599,32 +676,41 @@ requestWakeLock();
 /* Fullscreen kiosk launch */
 let soundEnabled = false;
 
-// MODIFIED: Only enable sound for the CURRENT active video.
 function enableVideoSound(){
+  // Only unmute/play the currently ACTIVE slide's video — never all of them.
   const activeSlide = document.querySelector('.slide.active');
-  if(activeSlide){
-    const v = activeSlide.querySelector('.img-wrap video');
-    if(v){
-      v.muted = false;
-      v.play().catch(()=>{});
-    }
+  if(!activeSlide) return;
+  const v = activeSlide.querySelector('.stage-video');
+  if(v){
+    v.muted = false;
+    v.currentTime = 0;
+    v.play().catch(()=>{});
   }
 }
 
 function launchFullscreen(){
-  // --- এখানে পরিবর্তন করা হয়েছে ---
-  if(slideTimer) clearTimeout(slideTimer);
-  currentIndex = 0; 
-  // -------------------------
-
+  const selectedCompany = document.getElementById('companyInput').value.trim();
   const typedBranch = document.getElementById('branchInput').value;
-  if(typedBranch){
-    localStorage.setItem('display_branch', typedBranch);
-    BRANCH_FILTER = typedBranch;
-  } else {
-    localStorage.removeItem('display_branch');
-    BRANCH_FILTER = '';
+  const companyExists = getCompanyNames().some(company => company === selectedCompany);
+  const branchExistsForCompany = allDisplayBranches.some(b =>
+    String(b.company || '').trim() === selectedCompany && String(b.name || '').trim() === typedBranch
+  );
+
+  if(!selectedCompany || !companyExists){
+    showToast('Please enter an exact company name from the list');
+    return;
   }
+  if(!typedBranch || !branchExistsForCompany){
+    showToast('Please select a branch for this company');
+    return;
+  }
+
+  localStorage.setItem('display_company', selectedCompany);
+  localStorage.setItem('display_branch', typedBranch);
+  COMPANY_FILTER = selectedCompany;
+  BRANCH_FILTER = typedBranch;
+
+  currentIndex = 0; // always start a fresh branch from its first product
   fetchProducts();
 
   const el = document.documentElement;
@@ -644,7 +730,6 @@ function launchFullscreen(){
    reloading the file — useful if one device is shared between branches. */
 function exitToStart(){
   if(slideTimer) clearTimeout(slideTimer);
-  currentIndex = 0; // এখানেও রিসেট করে দেওয়া হয়েছে
   const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
   if(exit && document.fullscreenElement){ exit.call(document).catch(()=>{}); }
   document.getElementById('startOverlay').style.display = 'flex';
