@@ -290,6 +290,55 @@ function escapeHtml(s){
 let BRANCH_FILTER = new URLSearchParams(location.search).get('branch') || localStorage.getItem('display_branch') || '';
 let COMPANY_FILTER = new URLSearchParams(location.search).get('company') || localStorage.getItem('display_company') || '';
 
+let displayPresenceChannel = null;
+let displayDeviceId = localStorage.getItem('display_device_id');
+if(!displayDeviceId){
+  displayDeviceId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('device-' + Date.now() + '-' + Math.random().toString(36).slice(2,10));
+  localStorage.setItem('display_device_id', displayDeviceId);
+}
+
+async function startDisplayPresence(){
+  if(displayPresenceChannel){
+    try{ await sb.removeChannel(displayPresenceChannel); }catch(e){}
+    displayPresenceChannel = null;
+  }
+  if(!COMPANY_FILTER) return;
+  const branch = String(BRANCH_FILTER || '').trim();
+  if(!branch) return;
+
+  const channelName = 'display-status:' + encodeURIComponent(COMPANY_FILTER);
+  displayPresenceChannel = sb.channel(channelName, { config:{ presence:{ key:displayDeviceId } } });
+  displayPresenceChannel.on('presence', { event:'sync' }, () => {}).subscribe(status => {
+    if(status === 'SUBSCRIBED'){
+      displayPresenceChannel.track({
+        deviceId: displayDeviceId,
+        company: COMPANY_FILTER,
+        branch: branch,
+        lastSeen: new Date().toISOString()
+      }).catch(()=>{});
+    }
+  });
+}
+
+async function stopDisplayPresence(){
+  if(displayPresenceChannel){
+    try{ await sb.removeChannel(displayPresenceChannel); }catch(e){}
+    displayPresenceChannel = null;
+  }
+}
+
+async function refreshDisplayPresence(){
+  if(!displayPresenceChannel || !COMPANY_FILTER || !BRANCH_FILTER) return;
+  try{
+    await displayPresenceChannel.track({
+      deviceId: displayDeviceId,
+      company: COMPANY_FILTER,
+      branch: String(BRANCH_FILTER).trim(),
+      lastSeen: new Date().toISOString()
+    });
+  }catch(e){}
+}
+
 async function fetchProducts(){
   // Company is mandatory here: never show products from another company.
   if(!COMPANY_FILTER){
@@ -712,6 +761,7 @@ function launchFullscreen(){
 
   currentIndex = 0; // always start a fresh branch from its first product
   fetchProducts();
+  startDisplayPresence();
 
   const el = document.documentElement;
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
@@ -730,7 +780,8 @@ function launchFullscreen(){
    reloading the file — useful if one device is shared between branches. */
 function exitToStart(){
   if(slideTimer) clearTimeout(slideTimer);
-  const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
+  stopDisplayPresence();
+  const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozExitFullScreen;
   if(exit && document.fullscreenElement){ exit.call(document).catch(()=>{}); }
   document.getElementById('startOverlay').style.display = 'flex';
 }
@@ -764,8 +815,11 @@ setInterval(() => {
   if(document.visibilityState === 'visible'){
     requestWakeLock();
     startNoSleepFallback();
+    refreshDisplayPresence();
   }
 }, 20000);
+
+window.addEventListener('beforeunload', () => { try{ displayPresenceChannel && displayPresenceChannel.untrack(); }catch(e){} });
 </script>
 </body>
 </html>
