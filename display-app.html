@@ -51,7 +51,7 @@
     flex:1; position:relative; overflow:hidden; background:#111;
     display:flex; align-items:center; justify-content:center;
   }
-  .img-wrap img, .img-wrap video{
+  .img-wrap img{
     width:100%; height:100%;
     object-fit:cover;
     filter:saturate(1.02);
@@ -233,7 +233,6 @@ if('serviceWorker' in navigator){
 </div>
 
 <div id="stage"></div>
-<video id="noSleepVideo" src="data:video/mp4;base64,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dG9vAAAAHWRhdGEAAAABAAAAAExhdmY2MC4xNi4xMDAAAAAIZnJlZQAABEZtZGF03gIATGF2YzYwLjMxLjEwMgACMEAOAAACrgYF//+q3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE2NCByMzEwOCAzMWUxOWY5IC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAyMyAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTI1IHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAD2WIhAA7//73Tr8Cm1TCYQAAAAhBmiRsQ7/+4AAAAAhBnkJ4hf/BgQEYIAcAAAAIAZ5hdEK/xIAAAAAIAZ5jakK/xIEAAAAOQZpoSahBaJlMCHf//uEBGCAHAAAACkGehkURLC//wYEAAAAIAZ6ldEK/xIEAAAAIAZ6nakK/xIABGCAHAAAADkGarEmoQWyZTAh3//7gAAAACkGeykUVLC//wYEAAAAIAZ7pdEK/xIABGCAHAAAACAGe62pCv8SAAAAADkGa8EmoQWyZTAhv//7hAAAACkGfDkUVLC//wYEBGCAHAAAACAGfLXRCv8SBAAAACAGfL2pCv8SAAAAADkGbNEmoQWyZTAhn//7gAAAACkGfUkUVLC//wYEBGCAHAAAACAGfcXRCv8SAAAAACAGfc2pCv8SAAAAADkGbeEmoQWyZTAhX//7BARggBwAAAApBn5ZFFSwv/8GAAAAACAGftXRCv8SBAAAACAGft2pCv8SB" muted playsinline loop style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; top:0; left:0;"></video>
 <div class="progress-track" id="progressTrack"></div>
 <div class="conn-dot" id="connDot"></div>
 <div class="back-btn" id="backBtn" onclick="exitToStart()">&#8592; Branch</div>
@@ -396,9 +395,6 @@ function renderStage(){
   if(currentIndex >= products.length) currentIndex = 0;
 
   const mediaHtml = p => {
-    if(p.video_url){
-      return `<video src="${p.video_url}" class="stage-video" loop muted playsinline></video>`;
-    }
     if(p.image_url){
       return `<img src="${p.image_url}">`;
     }
@@ -408,7 +404,7 @@ function renderStage(){
   stage.innerHTML = products.map((p, i) => {
     const hasElements = p.layout && Array.isArray(p.layout.elements);
     const hasOldLayout = p.layout && typeof p.layout.x === 'number' && !hasElements;
-    const hasMedia = !!(p.video_url || p.image_url);
+    const hasMedia = !!p.image_url;
 
     if(hasElements){
       const elementsHtml = p.layout.elements.map(el => {
@@ -447,7 +443,6 @@ function renderStage(){
 
   if(window.reapplyAllZoom) window.reapplyAllZoom();
   forceFontRepaint(stage);
-  if(typeof soundEnabled !== 'undefined' && soundEnabled) enableVideoSound();
 }
 
 /* Some Android WebViews don't repaint newly-inserted elements in a custom
@@ -475,21 +470,6 @@ function goToSlide(i){
   const slides = document.querySelectorAll('.slide');
   slides.forEach(s => s.classList.toggle('active', Number(s.dataset.i) === i));
 
-  // Only the active slide's video should ever play (with sound, if enabled).
-  // Every other video is paused and muted so sound never bleeds into
-  // whichever product the display has moved on to.
-  document.querySelectorAll('.stage-video').forEach(v => {
-    const slideEl = v.closest('.slide');
-    const isActive = slideEl && Number(slideEl.dataset.i) === i;
-    if(isActive){
-      v.muted = !(typeof soundEnabled !== 'undefined' && soundEnabled);
-      v.currentTime = 0;
-      v.play().catch(()=>{});
-    } else {
-      v.pause();
-      v.muted = true;
-    }
-  });
 
   const segs = document.querySelectorAll('.progress-seg');
   segs.forEach(seg => {
@@ -670,10 +650,8 @@ loadBranchOptions();
 fetchProducts();
 
 /* Keep the screen awake and prevent the phone from locking while the
-   display is running. Uses the native Wake Lock API where available,
-   plus a fallback (a silent looping video "stream") that also works
-   when the page is opened as a local file, where Wake Lock often isn't
-   allowed. Both are re-armed periodically and whenever the tab regains
+   display is running. Uses the native Wake Lock API where available.
+   The wake lock is re-armed periodically and whenever the tab regains
    focus, since phones can release a wake lock on their own. */
 let wakeLockRef = null;
 
@@ -685,15 +663,6 @@ async function requestWakeLock(){
   }
 }
 
-function startNoSleepFallback(){
-  try{
-    const video = document.getElementById('noSleepVideo');
-    if(video){
-      video.muted = true;
-      video.play().catch(()=>{});
-    }
-  }catch(e){}
-}
 
 function showToast(message){
   const existing = document.getElementById('toastMsg');
@@ -723,19 +692,6 @@ function showToast(message){
 requestWakeLock();
 
 /* Fullscreen kiosk launch */
-let soundEnabled = false;
-
-function enableVideoSound(){
-  // Only unmute/play the currently ACTIVE slide's video — never all of them.
-  const activeSlide = document.querySelector('.slide.active');
-  if(!activeSlide) return;
-  const v = activeSlide.querySelector('.stage-video');
-  if(v){
-    v.muted = false;
-    v.currentTime = 0;
-    v.play().catch(()=>{});
-  }
-}
 
 function launchFullscreen(){
   const selectedCompany = document.getElementById('companyInput').value.trim();
@@ -767,13 +723,8 @@ function launchFullscreen(){
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
   if(req){ req.call(el).catch(()=>{}); }
   requestWakeLock();
-  startNoSleepFallback();
   document.getElementById('startOverlay').style.display = 'none';
 
-  // The tap that starts the display counts as the user gesture browsers
-  // require to allow videos to play with sound.
-  soundEnabled = true;
-  enableVideoSound();
 }
 
 /* Lets the person on-site return to the branch-selection screen without
@@ -808,13 +759,11 @@ function togglePause(){
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible'){
     requestWakeLock();
-    startNoSleepFallback();
   }
 });
 setInterval(() => {
   if(document.visibilityState === 'visible'){
     requestWakeLock();
-    startNoSleepFallback();
     refreshDisplayPresence();
   }
 }, 20000);
