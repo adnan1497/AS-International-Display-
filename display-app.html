@@ -281,6 +281,7 @@ let products = [];
 let currentIndex = 0;
 let slideTimer = null;
 let progressStart = null;
+let productsFetchVersion = 0;
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -339,6 +340,10 @@ async function refreshDisplayPresence(){
 }
 
 async function fetchProducts(){
+  const requestVersion = ++productsFetchVersion;
+  const requestCompany = COMPANY_FILTER;
+  const requestBranch = BRANCH_FILTER;
+
   // Company is mandatory here: never show products from another company.
   if(!COMPANY_FILTER){
     products = [];
@@ -355,10 +360,15 @@ async function fetchProducts(){
     : query.order('id', {ascending:false});
   const { data, error } = await query;
   if(error){ console.error(error); return; }
+  if(requestVersion !== productsFetchVersion ||
+     requestCompany !== COMPANY_FILTER ||
+     requestBranch !== BRANCH_FILTER){
+    return;
+  }
   products = data || [];
-  await preloadImages(products);
   renderStage();
   restartCycle();
+  preloadImages(products);
 }
 
 /* Preload every product image into the browser cache before the first
@@ -716,14 +726,18 @@ function launchFullscreen(){
   BRANCH_FILTER = typedBranch;
 
   currentIndex = 0; // always start a fresh branch from its first product
-  fetchProducts();
+  if(slideTimer) clearTimeout(slideTimer);
+  fetchProducts().then(() => {
+    if(COMPANY_FILTER === selectedCompany && BRANCH_FILTER === typedBranch){
+      document.getElementById('startOverlay').style.display = 'none';
+    }
+  });
   startDisplayPresence();
 
   const el = document.documentElement;
   const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
   if(req){ req.call(el).catch(()=>{}); }
   requestWakeLock();
-  document.getElementById('startOverlay').style.display = 'none';
 
 }
 
