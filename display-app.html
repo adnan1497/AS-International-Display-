@@ -572,8 +572,8 @@ const channel = sb
     dot.classList.toggle('off', status !== 'SUBSCRIBED');
   });
 
-/* Fallback: also poll every 30s in case realtime misses an event */
-setInterval(fetchProducts, 30000);
+/* Fallback: also poll every 10 minutes in case realtime misses an event */
+setInterval(fetchProducts, 600000);
 
 let allDisplayBranches = [];
 
