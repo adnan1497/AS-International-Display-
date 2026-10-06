@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-display-v3';
+const CACHE_NAME = 'smart-display-v4';
 
 const ASSETS = [
     '/AS-International-Display-/',
@@ -33,13 +33,30 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Network first
-// This keeps your latest products/data available.
-// If network fails, use cached version.
+// Network first, but also save a copy of everything that loads successfully
+// (product photos, product data from Supabase) into the cache as it goes.
+// If the network fails (no wifi), fall back to the last saved copy instead
+// of breaking — so the display keeps showing the last-known products.
 self.addEventListener('fetch', (event) => {
+    // Only cache "read" requests (GET). Writes from the Admin Panel / Company
+    // Portal (POST/PATCH/DELETE) are left alone and always go straight to
+    // the network, untouched.
+    if (event.request.method !== 'GET') return;
+
     event.respondWith(
-        fetch(event.request).catch(() => {
-            return caches.match(event.request);
-        })
+        fetch(event.request)
+            .then((response) => {
+                if (response && (response.ok || response.type === 'opaque')) {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, copy);
+                    }).catch(() => {});
+                }
+                return response;
+            })
+            .catch(() => {
+                return caches.match(event.request);
+            })
     );
 });
+                        
