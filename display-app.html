@@ -651,6 +651,23 @@ async function loadBranchOptions(){
 loadBranchOptions();
 fetchProducts();
 
+/* Some Android WebViews (e.g. apps wrapped by AppsGeyser) are slow or
+   unreliable about popping up the on-screen keyboard on the first tap of
+   a text input. Re-assert focus a few times right after the tap/click so
+   the keyboard reliably appears without the user having to tap repeatedly. */
+(function fixCompanyInputKeyboard(){
+  const el = document.getElementById('companyInput');
+  if(!el) return;
+  function forceFocus(){
+    el.focus();
+    [40, 120, 250, 450].forEach(delay => {
+      setTimeout(() => { if(document.activeElement !== el) el.focus(); }, delay);
+    });
+  }
+  el.addEventListener('touchend', forceFocus, { passive: true });
+  el.addEventListener('click', forceFocus);
+})();
+
 /* Keep the screen awake and prevent the phone from locking while the
    display is running. Uses the native Wake Lock API where available.
    The wake lock is re-armed periodically and whenever the tab regains
